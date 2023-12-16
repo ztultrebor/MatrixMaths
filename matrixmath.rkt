@@ -52,58 +52,64 @@
 
 ; functions
 
-(define (transpose-matrix m)
+(define (transpose m)
   ; Matrix -> Matrix
   ; transpose a matrix
   (cond
-    [(not (matrix? m)) (error "not a matrix")]
+    [(empty? (first m)) '()]
+    [else (cons (first* m) (transpose (rest* m)))]))
+; checks
+(check-expect (transpose
+               (cons (cons 1 (cons 4 (cons 7 '())))
+                     (cons (cons 2 (cons 5 (cons 8 '())))
+                           (cons (cons 3 (cons 6 (cons 9 '()))) '()))))
+              (cons (cons 1 (cons 2 (cons 3 '())))
+                    (cons (cons 4 (cons 5 (cons 6 '())))
+                          (cons (cons 7 (cons 8 (cons 9 '()))) '()))))
+(check-expect (transpose
+               (cons (cons 1 (cons 4 '()))
+                     (cons (cons 2 (cons 5 '()))
+                           (cons (cons 3 (cons 6 '())) '()))))
+              (cons (cons 1 (cons 2 (cons 3 '())))
+                    (cons (cons 4 (cons 5 (cons 6 '()))) '())))
+
+
+(define (first* m)
+  ; Matrix -> Vector
+  ; removes the first row vector from a matrix
+  (cond
     [(empty? m) '()]
-    [(empty? (rest m)) (transpose-vector (first m))]
-    [else (hcat (transpose-vector (first m))
-                (transpose-matrix (rest m)))]))
+    [else (cons (first (first m)) (first* (rest m)))]))
 ; checks
-(check-expect (transpose-matrix (cons (cons 7 (cons 5 '()))
-                                      (cons (cons 9 (cons 0 '())) '())))
-              (cons (cons 7 (cons 9 '()))
-                    (cons (cons 5 (cons 0 '())) '())))
-(check-expect (transpose-matrix (cons (cons 7 (cons 5 (cons 4 '())))
-                                      (cons (cons 9 (cons 0 (cons 1 '()))) '())))
-              (cons (cons 7 (cons 9 '()))
-                    (cons (cons 5 (cons 0 '()))
-                          (cons (cons 4 (cons 1 '())) '()))))
+(check-expect (first* (cons (cons 1 (cons 4 (cons 7 '())))
+                            (cons (cons 2 (cons 5 (cons 8 '())))
+                                  (cons (cons 3 (cons 6 (cons 9 '()))) '()))))
+              (cons 1 (cons 2 (cons 3 '()))))
 
 
-(define (transpose-vector v)
-  ; Vector -> Vector
-  ; transpose a matrix
+(define (rest* m)
+  ; Matrix -> Vector
+  ; discards the first row vector of a matrix, returning the rest
   (cond
-    [(not (vector? v)) (error "not a vector")]
-    [(empty? v) '()]
-    [else (cons (cons (first v) '()) (transpose-vector (rest v)))]))
+    [(empty? m) '()]
+    [else (cons (rest (first m)) (rest* (rest m)))]))
 ; checks
-(check-expect (transpose-vector (cons 1 (cons 2 (cons 3 '()))))
-              (cons (cons 1 '()) (cons (cons 2 '()) (cons (cons 3 '()) '()))))
-
-
-(define (hcat m1 m2)
-  ; Matrix Matrix -> Matrix
-  ; horizontal concatenation of a pxn matrix with a qxn matrix
-  (cond
-    [(empty? m1) '()]
-    [else (cons (cons (first (first m1)) (first m2))
-                (hcat (rest m1) (rest m2)))]))
-; check
-(check-expect (hcat (cons (cons 1 '()) (cons (cons 2 '()) (cons (cons 3 '()) '())))
-                    (cons (cons 1 '()) (cons (cons 2 '()) (cons (cons 3 '()) '()))))
-              (cons (cons 1 (cons 1 '()))
-                    (cons (cons 2 (cons 2 '()))
-                          (cons (cons 3 (cons 3 '())) '()))))
+(check-expect (rest* (cons (cons 1 (cons 4 (cons 7 '())))
+                           (cons (cons 2 (cons 5 (cons 8 '())))
+                                 (cons (cons 3 (cons 6 (cons 9 '()))) '()))))
+              (cons (cons 4 (cons 7 '()))
+                    (cons (cons 5 (cons 8 '()))
+                          (cons (cons 6 (cons 9 '())) '()))))
+(check-expect (rest* (cons (cons 7 '())
+                           (cons (cons 8 '())
+                                 (cons (cons 9 '()) '()))))
+              (cons '() (cons '() (cons '() '()))))
 
 
 ; actions
 
-(define twix (cons (cons 1 (cons 2 (cons 3 '())))
-              (cons (cons 4 (cons 5 (cons 6 '())))
-              (cons (cons 7 (cons 8 (cons 9 '()))) '()))))
+(define twix (cons (cons 1 (cons 4 '()))
+                   (cons (cons 2 (cons 5 '()))
+                         (cons (cons 3 (cons 6 '())) '()))))
 
-(transpose-matrix twix)
+(transpose twix)
