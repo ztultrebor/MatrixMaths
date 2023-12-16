@@ -22,7 +22,6 @@
     [else ... (first v) ... (fn-on-vector (rest v))]))
           
 
-
 ; A Matrix is one of:
 ;   - '()
 ;   - cons (Vector Matrix)
@@ -49,6 +48,9 @@
     [(empty? m) ...]
     [else ... (first m) ... (fn-on-matrix (rest m))]))
 
+
+
+; functions
 
 (define (transpose-matrix m)
   ; Matrix -> Matrix
@@ -83,13 +85,13 @@
               (cons (cons 1 '()) (cons (cons 2 '()) (cons (cons 3 '()) '()))))
 
 
-(define (hcat colv m)
+(define (hcat m1 m2)
   ; Matrix Matrix -> Matrix
-  ; horizontal concatenation of a 1xn column vector with a mxn matrix
+  ; horizontal concatenation of a pxn matrix with a qxn matrix
   (cond
-    [(empty? colv) '()]
-    [else (cons (cons (first (first colv)) (first m))
-                (hcat (rest colv) (rest m)))]))
+    [(empty? m1) '()]
+    [else (cons (cons (first (first m1)) (first m2))
+                (hcat (rest m1) (rest m2)))]))
 ; check
 (check-expect (hcat (cons (cons 1 '()) (cons (cons 2 '()) (cons (cons 3 '()) '())))
                     (cons (cons 1 '()) (cons (cons 2 '()) (cons (cons 3 '()) '()))))
@@ -99,6 +101,7 @@
 
 
 ; actions
+
 (define twix (cons (cons 1 (cons 2 (cons 3 '())))
               (cons (cons 4 (cons 5 (cons 6 '())))
               (cons (cons 7 (cons 8 (cons 9 '()))) '()))))
