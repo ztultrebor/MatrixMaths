@@ -9,9 +9,15 @@
 ;   - '()
 ;   - cons (Number Vector)
 (define (vector? v)
-  (or (empty? v) (and (not (number? v)) (number? (first v)) (vector? (rest v)))))
+  (or
+   (empty? v)
+   (and
+    (not (number? v))
+    (number? (first v))
+    (vector? (rest v)))))
 ; checks
 (check-expect (vector? '()) #t)
+(check-expect (vector? 7) #f)
 (check-expect (vector? (cons 7 (cons 5 '()))) #t)
 (check-expect (vector? (cons 7 (cons "5" '()))) #f)
 #;
@@ -69,6 +75,10 @@
 ; checks
 (check-expect (*mat '() '()) '())
 (check-error (*mat (cons 7 '()) (cons 8 '())) "not matrices")
+(check-error (*mat
+              (cons (cons 1 (cons 3 '())) (cons (cons 2 (cons 4 '())) '()))
+              (cons (cons 1 '()) (cons (cons 3 '()) '())))
+             "matrices must be congruent")
 (check-expect (*mat
                (cons (cons 1 '()) (cons (cons 3 '()) '()))
                (cons (cons 1 (cons 3 '())) (cons (cons 2 (cons 4 '())) '())))
