@@ -9,12 +9,13 @@
 ;   - '()
 ;   - cons (Number Vector)
 (define (vector? v)
-  (or
-   (empty? v)
-   (and
-    (not (number? v))
-    (number? (first v))
-    (vector? (rest v)))))
+  (and
+   (list? v)
+   (or
+    (empty? v)
+    (and
+     (number? (first v))
+     (vector? (rest v))))))
 ; checks
 (check-expect (vector? '()) #t)
 (check-expect (vector? 7) #f)
@@ -33,23 +34,25 @@
 ;   - cons (Vector Matrix)
 ;   every Vector must be the same length
 (define (matrix? m)
-  (or
-   (empty? m)
-   (and
-    (vector? (first m))
-    (or
-     (empty? (rest m))
-     (= (length (first m)) (length (first (rest m)))))
-    (matrix? (rest m)))))
+  (and
+   (list? m)
+   (or
+    (empty? m)
+    (and 
+     (vector? (first m))
+     (matrix? (rest m))
+     (or
+      (empty? (rest m))
+      (= (length (first m)) (length (first (rest m)))))))))
 ; checks
 (check-expect (matrix? '()) #t)
+(check-expect (matrix? 7) #f)
 (check-expect (matrix? (cons 7 (cons 5 '()))) #f)
 (check-expect (matrix? (cons (cons 7 (cons 5 '())) '())) #t)
 (check-expect (matrix? (cons (cons (cons 1 '()) (cons 3 '())) '())) #f)
-(check-expect (matrix? (cons (cons 7 (cons 5 '()))
-                             (cons (cons 9 (cons 0 '())) '()))) #t)
-(check-expect (matrix? (cons (cons 7 (cons 5 '()))
-                             (cons (cons 0 '()) '()))) #f)
+(check-expect (matrix?
+               (cons (cons 1 '()) (cons (cons 2 '())
+                                        (cons (cons 3 (cons 3 '())) '())))) #f)
 #;
 (define (fn-on-matrix m)
   (cond
