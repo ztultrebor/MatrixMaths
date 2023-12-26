@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname matrixmath) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname matrixmath) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
 ; data structures
 
@@ -19,8 +19,8 @@
 ; checks
 (check-expect (vector? '()) #t)
 (check-expect (vector? 7) #f)
-(check-expect (vector? (cons 7 (cons 5 '()))) #t)
-(check-expect (vector? (cons 7 (cons "5" '()))) #f)
+(check-expect (vector? '(7 5)) #t)
+(check-expect (vector? '(7 "5")) #f)
 #;
 (define (fn-on-vector v)
   (cond
@@ -47,12 +47,10 @@
 ; checks
 (check-expect (matrix? '()) #t)
 (check-expect (matrix? 7) #f)
-(check-expect (matrix? (cons 7 (cons 5 '()))) #f)
-(check-expect (matrix? (cons (cons 7 (cons 5 '())) '())) #t)
-(check-expect (matrix? (cons (cons (cons 1 '()) (cons 3 '())) '())) #f)
-(check-expect (matrix?
-               (cons (cons 1 '()) (cons (cons 2 '())
-                                        (cons (cons 3 (cons 3 '())) '())))) #f)
+(check-expect (matrix? '(7 5)) #f)
+(check-expect (matrix? `(,'( 7 5))) #t)
+(check-expect (matrix? `(,`(,'(1) ,'(3)))) #f)
+(check-expect (matrix? `('(1) `(,'(2) `(,'(3 3))))) #f)
 #;
 (define (fn-on-matrix m)
   (cond
@@ -77,28 +75,13 @@
                 (*mat m1 (rest m2)))]))
 ; checks
 (check-expect (*mat '() '()) '())
-(check-error (*mat (cons 7 '()) (cons 8 '())) "not matrices")
-(check-error (*mat
-              (cons (cons 1 (cons 3 '())) (cons (cons 2 (cons 4 '())) '()))
-              (cons (cons 1 '()) (cons (cons 3 '()) '())))
+(check-error (*mat '(7) '(8)) "not matrices")
+(check-error (*mat `(,'(1 3) ,'(2 4)) `(,'(1) ,'(3)))
              "matrices must be congruent")
-(check-expect (*mat
-               (cons (cons 1 '()) (cons (cons 3 '()) '()))
-               (cons (cons 1 (cons 3 '())) (cons (cons 2 (cons 4 '())) '())))
-              (cons (cons 10 '()) (cons (cons 14 '()) '())))
-(check-expect (*mat
-               (cons (cons 1 (cons 3 '())) (cons (cons 2 (cons 4 '())) '()))
-               (cons (cons 1 (cons 3 '())) '()))
-              (cons (cons 7 (cons 15 '())) '()))
-(check-expect (*mat 
-               (cons (cons 1 (cons 4 (cons 7 '())))
-                     (cons (cons 2 (cons 5 (cons 8 '()))) '()))
-               (cons (cons 1 (cons 4 '()))
-                     (cons (cons 2 (cons 5 '()))
-                           (cons (cons 3 (cons 6 '())) '()))))
-              (cons (cons 9 (cons 24 (cons 39 '())))
-                    (cons (cons 12 (cons 33 (cons 54 '())))
-                          (cons (cons 15 (cons 42 (cons 69 '()))) '()))))
+(check-expect (*mat `(,'(1) ,'(3)) `(,'(1 3) ,'(2 4))) `(,'(10) ,'(14)))
+(check-expect (*mat `(,'(1 3) ,'(2 4)) `(,'(1 3))) `(,'(7 15)))
+(check-expect (*mat `(,'(1 4 7) ,'(2 5 8)) `(,'(1 4) ,'(2 5) ,'(3 6)))
+              `(,'(9 24 39) ,'(12 33 54) ,'(15 42 69)))
 
 
 (define (transpose m)
@@ -108,19 +91,9 @@
     [(empty? (first m)) '()]
     [else (cons (first* m) (transpose (rest* m)))]))
 ; checks
-(check-expect (transpose
-               (cons (cons 1 (cons 4 (cons 7 '())))
-                     (cons (cons 2 (cons 5 (cons 8 '())))
-                           (cons (cons 3 (cons 6 (cons 9 '()))) '()))))
-              (cons (cons 1 (cons 2 (cons 3 '())))
-                    (cons (cons 4 (cons 5 (cons 6 '())))
-                          (cons (cons 7 (cons 8 (cons 9 '()))) '()))))
-(check-expect (transpose
-               (cons (cons 1 (cons 4 '()))
-                     (cons (cons 2 (cons 5 '()))
-                           (cons (cons 3 (cons 6 '())) '()))))
-              (cons (cons 1 (cons 2 (cons 3 '())))
-                    (cons (cons 4 (cons 5 (cons 6 '()))) '())))
+(check-expect (transpose `(,'(1 4 7) ,'(2 5 8) ,'(3 6 9)))
+              `(,'(1 2 3) ,'(4 5 6) ,'(7 8 9)))
+(check-expect (transpose `(,'(1 4) ,'(2 5) ,'(3 6))) `(,'(1 2 3) ,'(4 5 6)))
 
 
 (define (first* m)
@@ -130,34 +103,23 @@
     [(empty? m) '()]
     [else (cons (first (first m)) (first* (rest m)))]))
 ; checks
-(check-expect (first* (cons (cons 7 '()) '())) (cons 7 '()))
-(check-expect (first* (cons (cons 4 '()) (cons (cons 7 '()) '())))
-              (cons 4 (cons 7 '())))
-(check-expect (first* (cons (cons 1 (cons 4 (cons 7 '())))
-                            (cons (cons 2 (cons 5 (cons 8 '())))
-                                  (cons (cons 3 (cons 6 (cons 9 '()))) '()))))
-              (cons 1 (cons 2 (cons 3 '()))))
+(check-expect (first* `(,'(7))) '(7))
+(check-expect (first* `(,'(4) ,'(7))) '(4 7))
+(check-expect (first* `(,'(1 4 7) ,'(2 5 8) ,'(3 6 9))) '(1 2 3))
 
 
 (define (rest* m)
-  ; Matrix -> Vector
+  ; Matrix -> Matrix
   ; discards the first row vector of a matrix, returning the rest
   (cond
     [(empty? m) '()]
     [else (cons (rest (first m)) (rest* (rest m)))]))
 ; checks
 (check-expect (rest* '()) '())
-(check-expect (rest* (cons (cons 7 '()) '())) (cons '() '()))
-(check-expect (rest* (cons (cons 1 (cons 4 (cons 7 '())))
-                           (cons (cons 2 (cons 5 (cons 8 '())))
-                                 (cons (cons 3 (cons 6 (cons 9 '()))) '()))))
-              (cons (cons 4 (cons 7 '()))
-                    (cons (cons 5 (cons 8 '()))
-                          (cons (cons 6 (cons 9 '())) '()))))
-(check-expect (rest* (cons (cons 7 '())
-                           (cons (cons 8 '())
-                                 (cons (cons 9 '()) '()))))
-              (cons '() (cons '() (cons '() '()))))
+(check-expect (rest* `(,'(7))) `(,'()))
+(check-expect (rest* `(,'(1 4 7) ,'(2 5 8) ,'(3 6 9)))
+              `(,'(4 7) ,'(5 8) ,'(6 9)))
+(check-expect (rest* `(,'(7) ,'(8) ,'(9))) `(,'() ,'() ,'()))
 
 
 (define (mat*vec m v)
@@ -167,14 +129,8 @@
     [(empty? m) '()]
     [else (cons (*inner (first m) v) (mat*vec (rest m) v))]))
 ; checks
-(check-expect (mat*vec
-               (cons (cons 1 (cons 3 '()))  (cons (cons 3 (cons 1 '())) '()))
-               (cons 1 (cons 3 '())))
-              (cons 10 (cons 6 '())))
-(check-expect (mat*vec
-               (cons (cons 1 (cons 3 '())) (cons (cons 2 (cons 4 '())) '()))
-               (cons 1 (cons 3 '())))
-              (cons 10 (cons 14 '())))
+(check-expect (mat*vec `(,'(1 3) ,'(3 1)) '(1 3)) '(10 6))
+(check-expect (mat*vec `(,'(1 3) ,'(2 4)) '(1 3)) '(10 14))
 
 
 (define (*inner v1 v2)
@@ -184,16 +140,17 @@
     [(empty? v2) 0]
     [else (+ (* (first v1) (first v2)) (*inner (rest v1) (rest v2)))]))
 ; checks
-(check-expect (*inner (cons 1 (cons 2 (cons 3 '())))
-                      (cons 4 (cons 5 (cons 6 '()))))
-              (+ (* 1 4) (* 2 5) (* 3 6)))
+(check-expect (*inner '(1 2 3) '(4 5 6))  (+ (* 1 4) (* 2 5) (* 3 6)))
 
 
 ; actions
 
-(define twix (cons (cons 1 (cons 4 (cons 7 '())))
-                   (cons (cons 2 (cons 5 (cons 8 '())))
-                         (cons (cons 3 (cons 6 (cons 9 '()))) '()))))
+(define twix `(,'(2 3 4 5 1)
+               ,'(4 5 1 2 3)
+               ,'(1 2 3 4 5)
+               ,'(5 1 2 3 4)
+               ,'(3 4 5 1 2)))
 
 (*mat (transpose twix) twix)
 (*mat twix (transpose twix))
+(*mat twix twix)
