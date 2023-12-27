@@ -96,6 +96,29 @@
 (check-expect (transpose `(,'(1 4) ,'(2 5) ,'(3 6))) `(,'(1 2 3) ,'(4 5 6)))
 
 
+(define (identityM n)
+  ; Natural -> Matrix
+  ; create an nxn identity matrix
+  (local (
+          (define (create-ortho-matrix m n)
+            (local (
+                    (define (create-ortho-vector m n)
+                      (cond
+                        [(= m 0) '()]
+                        [else (cons
+                               (if (= m n) 1 0)
+                               (create-ortho-vector (sub1 m) n))]))
+                    (define vector (create-ortho-vector m n)))
+              ; - IN -
+              (cond
+                [(= n 0) '()]
+                [else (cons vector (create-ortho-matrix m (sub1 n)))]))))
+    ; - IN -
+    (create-ortho-matrix n n)))
+; checks
+(check-expect (identityM 3) `(,'(1 0 0) ,'(0 1 0) ,'(0 0 1)))
+
+
 (define (first* m)
   ; Matrix -> Vector
   ; removes the first row vector from a matrix
@@ -154,3 +177,5 @@
 (*mat (transpose twix) twix)
 (*mat twix (transpose twix))
 (*mat twix twix)
+
+(identityM 5)
