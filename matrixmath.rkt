@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname matrixmath) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname matrixmath) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
 ; data structures
 
@@ -99,22 +99,8 @@
 (define (identityM n)
   ; Natural -> Matrix
   ; create an nxn identity matrix
-  (local (
-          (define (create-ortho-matrix m n)
-            (local (
-                    (define (create-ortho-vector m n)
-                      (cond
-                        [(= m 0) '()]
-                        [else (cons
-                               (if (= m n) 1 0)
-                               (create-ortho-vector (sub1 m) n))]))
-                    (define vector (create-ortho-vector m n)))
-              ; - IN -
-              (cond
-                [(= n 0) '()]
-                [else (cons vector (create-ortho-matrix m (sub1 n)))]))))
-    ; - IN -
-    (create-ortho-matrix n n)))
+  (build-list n (lambda (i)
+                  (build-list n (lambda (j) (if (= j i) 1 0))))))
 ; checks
 (check-expect (identityM 3) `(,'(1 0 0) ,'(0 1 0) ,'(0 0 1)))
 
